@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — GoTech CRM</title>
+  <style>
+    /* ====== RESET ====== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #222;
+      min-height: 100vh;
+    }
+
+    a { text-decoration: none; color: white; }
+    .small { font-size: 13px; }
+
+    /* ====== HEADER ====== */
+    header {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-bottom: 3px solid #0b63ce;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 30px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .header-left img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(11, 99, 206, 0.3);
+      transition: transform 0.3s;
+    }
+
+    .header-left img:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .header-center {
+      text-align: center;
+      flex: 1;
+    }
+
+    .header-center h1 {
+      color: #d41f2d;
+      font-size: 32px;
+      font-weight: 800;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+    }
+
+    .header-center p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .header-right img {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      border: 3px solid #0b63ce;
+      box-shadow: 0 4px 8px rgba(11, 99, 206, 0.3);
+      transition: all 0.3s;
+    }
+
+    .header-right img:hover {
+      transform: scale(1.1);
+      border-color: #d41f2d;
+    }
+
+    /* ====== LANGUAGE TOGGLE ====== */
+    .lang-toggle {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      display: flex;
+      background: linear-gradient(90deg, #0b63ce, #2d66c3);
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .lang-toggle button {
+      border: none;
+      background: none;
+      color: white;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .lang-toggle button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .lang-toggle button.active {
+      background: #003b82;
+      font-weight: bold;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* ====== NAVIGATION ====== */
+    nav {
+      background: linear-gradient(90deg, #3f78e0, #2d66c3, #1e4f9f);
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 15px 0;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    nav a {
+      margin: 8px 25px;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+
+    nav a:hover {
+      color: #ffdf40;
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    nav a.active {
+      background: rgba(255,255,255,0.2);
+      color: #ffdf40;
+    }
+
+    /* ====== TOGGLE BUTTON (mobile) ====== */
+    .toggle-btn {
+      display: none;
+      font-size: 28px;
+      background: linear-gradient(135deg, #0b63ce, #2d66c3);
+      border: none;
+      cursor: pointer;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        text-align: center;
+      }
+      nav.show { 
+        display: flex; 
+        animation: slideDown 0.3s ease-out;
+      }
+      .toggle-btn { display: block; position: absolute; top: 20px; left: 20px; }
+      .header-center h1 { font-size: 24px; }
+      .lang-toggle { top: 90px; }
+      .filter-row { flex-direction: column; }
+      .table-container { overflow-x: auto; }
+    }
+
+    /* ====== MAIN SECTION ====== */
+    .main-section {
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      max-width: 500px;
+      margin: 0 auto;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-container h2 {
+      color: #0b63ce;
+      font-size: 32px;
+      margin-bottom: 10px;
+      text-align: center;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .login-container .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .login-form {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    .input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: #0b63ce;
+      box-shadow: 0 0 0 3px rgba(11, 99, 206, 0.1);
+    }
+
+    .input:hover {
+      border-color: #2d66c3;
+    }
+
+    .btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0b63ce, #2d66c3);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(11, 99, 206, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d, #5a6268);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ====== ADMIN AREA ====== */
+    .admin-container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .admin-header h2 {
+      color: #0b63ce;
+      font-size: 28px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 3px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(220, 53, 69, 0.5);
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 10px;
+    }
+
+    .filter-row .input {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .summary-card {
+      background: linear-gradient(135deg, #0b63ce, #2d66c3);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(11, 99, 206, 0.3);
+    }
+
+    .summary-card .title {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .summary-card .content {
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .table-container {
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    .table thead {
+      background: linear-gradient(135deg, #0b63ce, #2d66c3);
+      color: white;
+    }
+
+    .table th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    .table tbody tr {
+      transition: all 0.3s;
+    }
+
+    .table tbody tr:hover {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      transform: scale(1.01);
+    }
+
+    .table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 16px;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      background: linear-gradient(135deg, #1e4f9f, #0b63ce);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 25px 30px;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+      margin-top: 60px;
+    }
+
+    footer .small { font-size: 12px; opacity: 0.9; }
+
+    /* ====== SCROLL TO TOP ====== */
+    .scroll-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #d41f2d, #ff4444);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(212, 31, 45, 0.5);
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(212, 31, 45, 0.7);
+    }
+
+    .scroll-top.show {
+      display: flex;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 18px;
+      color: #0b63ce;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(3, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ====== HEADER ====== -->
+  <header>
+    <button class="toggle-btn" id="menuToggle">☰</button>
+    <div class="header-left">
+      <img src="logo.png" alt="Company Logo">
+    </div>
+    <div class="header-center">
+      <h1>Go Technology Solution Company</h1>
+      <p>P.O.Box 22 - Ruvuma, Songea | Mob: 0655485784 / 0744065662<br>Email: gotechnology220@gmail.com</p>
+      <div class="small"><i>We take the future to you</i></div>
+    </div>
+    <div class="header-right">
+      <img src="dp.png" alt="Developer Photo">
+    </div>
+    <div class="lang-toggle">
+      <button id="enBtn" class="active">English</button>
+      <button id="swBtn">Swahili</button>
+    </div>
+  </header>
+
+  <!-- ====== NAVIGATION ====== -->
+  <nav id="navbar">
+    <a href="index.html">🏠 Home</a>
+    <a href="register.html">📝 Register Customer</a>
+    <a href="admin.html" class="active">👤 Admin</a>
+    <a href="composer.html">💬 Bulk SMS</a>
+  </nav>
+
+  <!-- ====== MAIN SECTION ====== -->
+  <div class="main-section">
+    <!-- LOGIN SECTION -->
+    <div id="loginSection" class="login-container">
+      <h2>🔐 Admin Login</h2>
+      <p class="subtitle">Enter your admin password to access customer records</p>
+
+      <div class="login-form">
+        <input id="adminPass" class="input" type="password" placeholder="Enter admin password" />
+        <button class="btn btn-primary" onclick="login()">🔓 Login</button>
+      </div>
+    </div>
+
+    <!-- ADMIN AREA -->
+    <div id="adminArea" style="display:none;">
+      <div class="admin-container">
+        <div class="admin-header">
+          <h2>📊 Customer Management</h2>
+          <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filter-row">
+          <input id="filterName" placeholder="🔍 Filter by name" class="input"/>
+          <input id="filterPlace" placeholder="📍 Filter by place" class="input"/>
+          <select id="filterService" class="input">
+            <option value="">All services</option>
+            <option value="CCTV">📹 CCTV</option>
+            <option value="Computer">💻 Computer</option>
+            <option value="Printer">🖨️ Printer</option>
+            <option value="Router">📡 Router</option>
+            <option value="Video Intercom">🔔 Video Intercom</option>
+            <option value="Time Attendance">⏰ Time Attendance</option>
+          </select>
+          <button class="btn btn-primary" onclick="applyFilters()">🔍 Apply Filters</button>
+          <button class="btn btn-success" onclick="fetchAll()">🔄 Refresh</button>
+        </div>
+
+        <!-- SUMMARY -->
+        <div id="summary" class="summary-card">
+          <div class="title">📈 Summary Statistics</div>
+          <div class="content">Loading data...</div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+          <table class="table" id="customersTbl">
+            <thead>
+              <tr>
+                <th>👤 Name</th>
+                <th>📱 Phone</th>
+                <th>📍 Place</th>
+                <th>🛠️ Service</th>
+                <th>📝 Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colspan="5" class="loading">Loading customer data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== FOOTER ====== -->
+  <footer>
+    <div>
+      <div style="font-weight:700; font-size: 16px;">Developed by: Go Technology Solution</div>
+      <div class="small">📞 0744065662 | ✉ yusuphlameck220@gmail.com</div>
+    </div>
+    <div class="small">© 2025 GoTech Solutions | All Rights Reserved</div>
+  </footer>
+
+  <!-- ====== SCROLL TO TOP ====== -->
+  <div class="scroll-top" id="scrollTop">↑</div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhYKvxY6UdMBnxK8E6vvbZxDLmBNwPBnjXnA7bIWlEAUbbvDWedRdVqa0246fv7v7VRA/exec';
+    let adminToken = null;
+
+    // ====== MOBILE TOGGLE ======
+    const toggleBtn = document.getElementById('menuToggle');
+    const nav = document.getElementById('navbar');
+    toggleBtn.addEventListener('click', () => {
+      nav.classList.toggle('show');
+    });
+
+    // ====== LANGUAGE TOGGLE ======
+    const enBtn = document.getElementById('enBtn');
+    const swBtn = document.getElementById('swBtn');
+
+    enBtn.addEventListener('click', () => {
+      enBtn.classList.add('active');
+      swBtn.classList.remove('active');
+      showNotification("Language switched to English");
+    });
+    swBtn.addEventListener('click', () => {
+      swBtn.classList.add('active');
+      enBtn.classList.remove('active');
+      showNotification("Lugha imebadilishwa kuwa Kiswahili");
+    });
+
+    // ====== NOTIFICATION SYSTEM ======
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: linear-gradient(135deg, #0b63ce, #2d66c3);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        animation: slideInRight 0.3s ease-out;
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // ====== SCROLL TO TOP ======
+    const scrollTopBtn = document.getElementById('scrollTop');
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('show');
+      } else {
+        scrollTopBtn.classList.remove('show');
+      }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ====== LOGIN FUNCTION ======
+    async function login() {
+      const pw = document.getElementById('adminPass').value;
+      if (!pw) {
+        showNotification('⚠️ Please enter password');
+        return;
+      }
+
+      try {
+        const res = await fetch(SCRIPT_URL + '?action=login&password=' + encodeURIComponent(pw));
+        const j = await res.json();
+        
+        if (j.success) {
+          adminToken = j.token;
+          document.getElementById('loginSection').style.display = 'none';
+          document.getElementById('adminArea').style.display = 'block';
+          document.getElementById('adminPass').value = '';
+          showNotification('✅ Login successful!');
+          fetchAll();
+        } else {
+          showNotification('❌ Invalid password');
+        }
+      } catch (e) {
+        showNotification('❌ Network error: ' + e.message);
+      }
+    }
+
+    // ====== LOGOUT FUNCTION ======
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        adminToken = null;
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('adminArea').style.display = 'none';
+        showNotification('👋 Logged out successfully');
+      }
+    }
+
+    // ====== FETCH ALL CUSTOMERS ======
+    async function fetchAll() {
+      if (!adminToken) {
+        showNotification('⚠️ Please login first');
+        return;
+      }
+
+      const tbody = document.querySelector('#customersTbl tbody');
+      tbody.innerHTML = '<tr><td colspan="5" class="loading">Loading customer data</td></tr>';
+
+      try {
+        const res = await fetch(SCRIPT_URL + '?action=listCustomers&token=' + encodeURIComponent(adminToken));
+        const j = await res.json();
+        
+        if (j.success) {
+          renderTable(j.data);
+          renderSummary(j.data);
+          showNotification('✅ Data loaded successfully');
+        } else {
+          showNotification('❌ Error: ' + (j.error || 'unknown'));
+          tbody.innerHTML = '<tr><td colspan="5" class="no-data">Failed to load data</td></tr>';
+        }
+      } catch (e) {
+        showNotification('❌ Network error: ' + e.message);
+        tbody.innerHTML = '<tr><td colspan="5" class="no-data">Network error occurred</td></tr>';
+      }
+    }
+
+    // ====== RENDER TABLE ======
+    function renderTable(rows) {
+      const tbody = document.querySelector('#customersTbl tbody');
+      tbody.innerHTML = '';
+      
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="no-data">No customers found</td></tr>';
+        return;
+      }
+
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${r.firstName} ${r.lastName}</strong></td>
+          <td>${r.phone}</td>
+          <td>${r.place}</td>
+          <td>${r.service}</td>
+          <td>${r.description || '<em style="color: #999;">No description</em>'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ====== RENDER SUMMARY ======
+    function renderSummary(rows) {
+      const total = rows.length;
+      const byService = {};
+      rows.forEach(r => byService[r.service] = (byService[r.service] || 0) + 1);
+      
+      let txt = `<strong>Total Customers:</strong> ${total}<br><br>`;
+      txt += '<strong>Services Breakdown:</strong><br>';
+      
+      if (Object.keys(byService).length > 0) {
+        txt += Object.entries(byService)
+          .map(([k, v]) => `• ${k}: <strong>${v}</strong> customer${v > 1 ? 's' : ''}`)
+          .join('<br>');
+      } else {
+        txt += 'No services recorded';
+      }
+      
+      document.querySelector('#summary .content').innerHTML = txt;
+    }
+
+    // ====== APPLY FILTERS ======
+    async function applyFilters() {
+      if (!adminToken) {
+        showNotification('⚠️ Please login first');
+        return;
+      }
+
+      const name = document.getElementById('filterName').value.trim();
+      const place = document.getElementById('filterPlace').value.trim();
+      const service = document.getElementById('filterService').value;
+
+      const params = new URLSearchParams({ action: 'filter', token: adminToken });
+      if (name) params.set('name', name);
+      if (place) params.set('place', place);
+      if (service) params.set('service', service);
+
+      const tbody = document.querySelector('#customersTbl tbody');
+      tbody.innerHTML = '<tr><td colspan="5" class="loading">Applying filters</td></tr>';
+
+      try {
+        const res = await fetch(SCRIPT_URL + '?' + params.toString());
+        const j = await res.json();
+        
+        if (j.success) {
+          renderTable(j.data);
+          renderSummary(j.data);
+          showNotification('✅ Filters applied');
+        } else {
+          showNotification('❌ Error: ' + (j.error || 'unknown'));
+          tbody.innerHTML = '<tr><td colspan="5" class="no-data">Failed to apply filters</td></tr>';
+        }
+      } catch (e) {
+        showNotification('❌ Network error: ' + e.message);
+        tbody.innerHTML = '<tr><td colspan="5" class="no-data">Network error occurred</td></tr>';
+      }
+    }
+
+    // ====== ENTER KEY LOGIN ======
+    document.getElementById('adminPass').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        login();
+      }
+    });
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

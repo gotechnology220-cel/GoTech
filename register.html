@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Customer — GoTech CRM</title>
+  <style>
+    /* ====== RESET ====== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #222;
+      min-height: 100vh;
+    }
+
+    a { text-decoration: none; color: white; }
+    .small { font-size: 13px; }
+
+    /* ====== HEADER ====== */
+    header {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-bottom: 3px solid #0b63ce;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 30px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .header-left img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(11, 99, 206, 0.3);
+      transition: transform 0.3s;
+    }
+
+    .header-left img:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .header-center {
+      text-align: center;
+      flex: 1;
+    }
+
+    .header-center h1 {
+      color: #d41f2d;
+      font-size: 32px;
+      font-weight: 800;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+    }
+
+    .header-center p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .header-right img {
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      border: 3px solid #0b63ce;
+      box-shadow: 0 4px 8px rgba(11, 99, 206, 0.3);
+      transition: all 0.3s;
+    }
+
+    .header-right img:hover {
+      transform: scale(1.1);
+      border-color: #d41f2d;
+    }
+
+    /* ====== LANGUAGE TOGGLE ====== */
+    .lang-toggle {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      display: flex;
+      background: linear-gradient(90deg, #0b63ce, #2d66c3);
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    .lang-toggle button {
+      border: none;
+      background: none;
+      color: white;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .lang-toggle button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .lang-toggle button.active {
+      background: #003b82;
+      font-weight: bold;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* ====== NAVIGATION ====== */
+    nav {
+      background: linear-gradient(90deg, #3f78e0, #2d66c3, #1e4f9f);
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 15px 0;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    nav a {
+      margin: 8px 25px;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+
+    nav a:hover {
+      color: #ffdf40;
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    nav a.active {
+      background: rgba(255,255,255,0.2);
+      color: #ffdf40;
+    }
+
+    /* ====== TOGGLE BUTTON (mobile) ====== */
+    .toggle-btn {
+      display: none;
+      font-size: 28px;
+      background: linear-gradient(135deg, #0b63ce, #2d66c3);
+      border: none;
+      cursor: pointer;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        display: none;
+        flex-direction: column;
+        text-align: center;
+      }
+      nav.show { 
+        display: flex; 
+        animation: slideDown 0.3s ease-out;
+      }
+      .toggle-btn { display: block; position: absolute; top: 20px; left: 20px; }
+      .header-center h1 { font-size: 24px; }
+      .lang-toggle { top: 90px; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ====== MAIN SECTION ====== */
+    .main-section {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .form-container {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-container h2 {
+      color: #0b63ce;
+      font-size: 32px;
+      margin-bottom: 10px;
+      text-align: center;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .form-container .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-grid .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 15px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: #0b63ce;
+      box-shadow: 0 0 0 3px rgba(11, 99, 206, 0.1);
+    }
+
+    .input:hover {
+      border-color: #2d66c3;
+    }
+
+    textarea.input {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .button-group {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 14px 40px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0b63ce, #2d66c3);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(11, 99, 206, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d, #5a6268);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      grid-column: 1 / -1;
+      padding: 14px 18px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 600;
+      margin-top: 10px;
+      animation: slideInDown 0.3s ease-out;
+    }
+
+    @keyframes slideInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    .message.error {
+      background: linear-gradient(135deg, #dc3545, #c82333);
+      color: white;
+    }
+
+    .message.loading {
+      background: linear-gradient(135deg, #ffc107, #ffb300);
+      color: #222;
+    }
+
+    /* ====== FOOTER ====== */
+    footer {
+      background: linear-gradient(135deg, #1e4f9f, #0b63ce);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 25px 30px;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+      margin-top: 60px;
+    }
+
+    footer .small { font-size: 12px; opacity: 0.9; }
+
+    /* ====== SCROLL TO TOP ====== */
+    .scroll-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, #d41f2d, #ff4444);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(212, 31, 45, 0.5);
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .scroll-top:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(212, 31, 45, 0.7);
+    }
+
+    .scroll-top.show {
+      display: flex;
+    }
+
+    /* ====== LABEL STYLING ====== */
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field label {
+      font-weight: 600;
+      color: #444;
+      font-size: 14px;
+    }
+
+    .required {
+      color: #d41f2d;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ====== HEADER ====== -->
+  <header>
+    <button class="toggle-btn" id="menuToggle">☰</button>
+    <div class="header-left">
+      <img src="logo.png" alt="Company Logo">
+    </div>
+    <div class="header-center">
+      <h1>Go Technology Solution Company</h1>
+      <p>P.O.Box 22 - Ruvuma, Songea | Mob: 0655485784 / 0744065662<br>Email: gotechnology220@gmail.com</p>
+      <div class="small"><i>We take the future to you</i></div>
+    </div>
+    <div class="header-right">
+      <img src="dp.png" alt="Developer Photo">
+    </div>
+    <div class="lang-toggle">
+      <button id="enBtn" class="active">English</button>
+      <button id="swBtn">Swahili</button>
+    </div>
+  </header>
+
+  <!-- ====== NAVIGATION ====== -->
+  <nav id="navbar">
+    <a href="index.html">🏠 Home</a>
+    <a href="register.html" class="active">📝 Register Customer</a>
+    <a href="admin.html">👤 Admin</a>
+    <a href="composer.html">💬 Bulk SMS</a>
+  </nav>
+
+  <!-- ====== MAIN SECTION ====== -->
+  <div class="main-section">
+    <div class="form-container">
+      <h2>📝 Register New Customer</h2>
+      <p class="subtitle">Fill in the customer details below. All fields are required except description.</p>
+
+      <form id="regForm" class="form-grid">
+        <div class="form-field">
+          <label>First Name <span class="required">*</span></label>
+          <input name="firstName" placeholder="Enter first name" class="input" required/>
+        </div>
+
+        <div class="form-field">
+          <label>Last Name <span class="required">*</span></label>
+          <input name="lastName" placeholder="Enter last name" class="input" required/>
+        </div>
+
+        <div class="form-field">
+          <label>Phone Number <span class="required">*</span></label>
+          <input name="phone" placeholder="e.g. 2557... or 0744..." class="input" required/>
+        </div>
+
+        <div class="form-field">
+          <label>Location <span class="required">*</span></label>
+          <input name="place" placeholder="Place / Town / City" class="input" required/>
+        </div>
+
+        <div class="form-field full-width">
+          <label>Favorite Service <span class="required">*</span></label>
+          <select name="service" class="input" required>
+            <option value="">-- Select a service --</option>
+            <option value="CCTV">📹 CCTV</option>
+            <option value="Computer">💻 Computer</option>
+            <option value="Printer">🖨️ Printer</option>
+            <option value="Router">📡 Router</option>
+            <option value="Video Intercom">🔔 Video Intercom</option>
+            <option value="Time Attendance">⏰ Time Attendance</option>
+          </select>
+        </div>
+
+        <div class="form-field full-width">
+          <label>Additional Description (Optional)</label>
+          <textarea name="description" placeholder="Add any additional notes or requirements..." class="input"></textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary">💾 Save Customer</button>
+          <button type="button" class="btn btn-secondary" id="resetBtn">🔄 Reset Form</button>
+        </div>
+
+        <div id="msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== FOOTER ====== -->
+  <footer>
+    <div>
+      <div style="font-weight:700; font-size: 16px;">Developed by: Go Technology Solution</div>
+      <div class="small">📞 0744065662 | ✉ yusuphlameck220@gmail.com</div>
+    </div>
+    <div class="small">© 2025 GoTech Solutions | All Rights Reserved</div>
+  </footer>
+
+  <!-- ====== SCROLL TO TOP ====== -->
+  <div class="scroll-top" id="scrollTop">↑</div>
+
+  <script>
+  // === Replace this URL with your actual deployed Apps Script Web App URL ===
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyqcWgxJzYv_EpXFTbf5uBoEdFlIyaDPtCfP-PyCMguabMtCO4sSUihLztFDhHYhr-2kQ/exec';
+
+  // === Handle form submission ===
+  const form = document.getElementById('regForm');
+  const msgDiv = document.getElementById('msg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const data = {
+      firstName: form.firstName.value.trim(),
+      lastName: form.lastName.value.trim(),
+      phone: form.phone.value.trim(),
+      place: form.place.value.trim(),
+      service: form.service.value,
+      description: form.description.value.trim(),
+    };
+
+    msgDiv.className = 'message loading';
+    msgDiv.textContent = '⏳ Saving customer data...';
+
+    try {
+      const res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const result = await res.json();
+
+      if (result.status === 'success') {
+        msgDiv.className = 'message success';
+        msgDiv.textContent = '✅ Customer registered successfully!';
+        form.reset();
+      } else {
+        msgDiv.className = 'message error';
+        msgDiv.textContent = '❌ ' + (result.message || 'Error saving data');
+      }
+    } catch (err) {
+      msgDiv.className = 'message error';
+      msgDiv.textContent = '❌ Network error: ' + err.message;
+    }
+  });
+  </script>
+
+</body>
+</html>
